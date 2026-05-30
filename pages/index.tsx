@@ -67,7 +67,7 @@ export default function Home() {
   const bomRef   = useRef<HTMLInputElement>(null)
 
   const allProducts  = Object.keys(allResults).sort()
-  const allMaterials = [...new Set(bom.map(r => r.material))].sort()
+  const allMaterials = Array.from(new Set(bom.map(r => r.material))).sort()
   const activeProds  = selProds.length ? selProds : allProducts
   const activeMats   = selMats.length  ? selMats  : allMaterials
 
@@ -87,7 +87,7 @@ export default function Home() {
       const { allResults: ar } = await res.json()
       setAllResults(ar)
       setSelProds(Object.keys(ar).sort())
-      setSelMats([...new Set(b.map((r: BomRow) => r.material))].sort())
+      setSelMats(Array.from(new Set(b.map((r: BomRow) => r.material))).sort())
       setProcessedAt(new Date().toLocaleString('id-ID'))
     } finally {
       setLoading(false)
@@ -379,8 +379,8 @@ export default function Home() {
             {activeTab === 3 && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 {[
-                  { title: 'Sales data', cols: ['date','product_name','sales_qty'], rows: sales.slice(0,8) as Record<string,unknown>[] },
-                  { title: 'BOM data', cols: ['product_name','material','component_qty'], rows: bom as Record<string,unknown>[] },
+                  { title: 'Sales data', cols: ['date','product_name','sales_qty'], rows: sales.slice(0,8) as unknown as Record<string,unknown>[] },
+                  { title: 'BOM data', cols: ['product_name','material','component_qty'], rows: bom as unknown as Record<string,unknown>[] },
                 ].map(({ title, cols, rows }) => (
                   <div key={title}>
                     {secLabel(title)}

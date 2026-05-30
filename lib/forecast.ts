@@ -316,7 +316,7 @@ export function forecastProduct(
 }
 
 export function runAllForecasts(rows: SalesRow[], horizon = 30): AllResults {
-  const products = [...new Set(rows.map(r => r.product_name))]
+  const products = Array.from(new Set(rows.map(r => r.product_name)))
   const out: AllResults = {}
   for (const p of products) {
     out[p] = forecastProduct(rows, p, horizon)

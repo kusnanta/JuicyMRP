@@ -41,8 +41,8 @@ export function pivotMrp(daily: MrpDailyRow[]): {
   data: Record<string, Record<string, number>>
   totals: Record<string, number>
 } {
-  const materials = [...new Set(daily.map(r => r.material))].sort()
-  const dates     = [...new Set(daily.map(r => r.order_date))].sort()
+  const materials = Array.from(new Set(daily.map(r => r.material))).sort()
+  const dates     = Array.from(new Set(daily.map(r => r.order_date))).sort()
   const data: Record<string, Record<string, number>> = {}
   const totals: Record<string, number> = {}
 
