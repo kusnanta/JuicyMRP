@@ -67,7 +67,7 @@ export default function Home() {
   const bomRef   = useRef<HTMLInputElement>(null)
 
   const allProducts  = Object.keys(allResults).sort()
-  const allMaterials = [...new Set(bom.map(r => r.material))].sort()
+  const allMaterials = Array.from(new Set(bom.map(r => r.material))).sort()
   const activeProds  = selProds.length ? selProds : allProducts
   const activeMats   = selMats.length  ? selMats  : allMaterials
 
@@ -87,7 +87,7 @@ export default function Home() {
       const { allResults: ar } = await res.json()
       setAllResults(ar)
       setSelProds(Object.keys(ar).sort())
-      setSelMats([...new Set(b.map((r: BomRow) => r.material))].sort())
+      setSelMats(Array.from(new Set(b.map((r: BomRow) => r.material))).sort())
       setProcessedAt(new Date().toLocaleString('id-ID'))
     } finally {
       setLoading(false)
