@@ -13,14 +13,14 @@
     "react": "^18",
     "react-dom": "^18",
     "papaparse": "^5.4.1",
-    "plotly.js-dist-min": "^2.32.0",
-    "react-plotly.js": "^2.6.0"
+    "plotly.js-dist-min": "^2.32.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/papaparse": "^5.3.14",
+    "@types/plotly.js": "^2.12.29",
     "typescript": "^5",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
