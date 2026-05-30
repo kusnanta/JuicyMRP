@@ -17,7 +17,13 @@ const PROD_COLORS = ['#185FA5','#3B6D11','#854F0B','#A32D2D','#534AB7','#0F6E56'
 const pc = (i: number) => PROD_COLORS[i % PROD_COLORS.length]
 
 function addDays(d: Date, n: number) { const r = new Date(d); r.setDate(r.getDate()+n); return r }
-function fmtDate(d: Date) { return d.toISOString().slice(0,10) }
+function fmtDate(d: Date) {
+  // Use local date parts to avoid UTC off-by-one in non-UTC timezones
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 function today0() { const d = new Date(); d.setHours(0,0,0,0); return d }
 
 function downloadCsv(content: string, filename: string) {
@@ -238,7 +244,8 @@ export default function Home() {
 
                 {secLabel('Historical 30H + Forecast 30 hari ke depan')}
                 <div style={{ overflow: 'hidden', borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', marginBottom: 16 }}>
-                  <ForecastChart sales={sales} forecasts={fc_filtered} products={activeProds} histDays={30} dateFrom={dateFrom} dateTo={dateTo} height={280} />
+                  {/* Dashboard chart: full 30-day forecast, no filter-range highlight */}
+              <ForecastChart sales={sales} forecasts={fc_filtered} products={activeProds} histDays={30} height={280} />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -250,7 +257,7 @@ export default function Home() {
                     {secLabel('Kebutuhan beli material — 3 hari ke depan')}
                     {(() => {
                       const d3Dates = [fmtDate(today), fmtDate(addDays(today,1)), fmtDate(addDays(today,2))]
-                      const d3 = calculateDailyMrp(fc_filtered, bom, activeProds, fmtDate(today), fmtDate(addDays(today,2)))
+                      const d3 = calculateDailyMrp(fc_filtered, bom, activeProds, fmtDate(today), fmtDate(addDays(today, 2)))
                       const pv = pivotMrp(d3)
                       return <MrpPivotTable {...pv} />
                     })()}
