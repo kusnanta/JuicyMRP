@@ -379,8 +379,8 @@ export default function Home() {
             {activeTab === 3 && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 {[
-                  { title: 'Sales data', cols: ['date','product_name','sales_qty'], rows: sales.slice(0,8) as Record<string,unknown>[] },
-                  { title: 'BOM data', cols: ['product_name','material','component_qty'], rows: bom as Record<string,unknown>[] },
+                  { title: 'Sales data', cols: ['date','product_name','sales_qty'], rows: sales.slice(0,8) as unknown as Record<string,unknown>[] },
+                  { title: 'BOM data', cols: ['product_name','material','component_qty'], rows: bom as unknown as Record<string,unknown>[] },
                 ].map(({ title, cols, rows }) => (
                   <div key={title}>
                     {secLabel(title)}
