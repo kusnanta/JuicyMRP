@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Next 15: turbopack is default for dev but build uses webpack — no change needed
+  eslint: {
+    // ESLint not installed — skip during build
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // TypeScript errors caught by IDE/CI separately
+    ignoreBuildErrors: false,
+  },
 }
 
 module.exports = nextConfig
