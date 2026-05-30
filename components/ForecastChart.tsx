@@ -15,7 +15,6 @@ interface Props {
   height?: number
 }
 
-// Minimal subset of the Plotly API we actually call
 interface PlotlySubset {
   react: (
     root: HTMLElement,
@@ -37,8 +36,6 @@ export default function ForecastChart({
 
     import('plotly.js-dist-min').then((mod) => {
       if (cancelled || !divRef.current) return
-
-      // Cast to our minimal interface — avoids depending on exact @types/plotly.js version
       const Plotly = mod as unknown as PlotlySubset
 
       const today = new Date()
@@ -50,17 +47,18 @@ export default function ForecastChart({
 
       const traces: object[] = []
 
-      // Highlight band for filter date range
+      // ── Highlight band for filter date range ──────────────────────
+      // Use null y-values + fill — Plotly autoscales, band stays invisible
       if (dateFrom && dateTo) {
         traces.push({
-          x: [dateFrom, dateTo, dateTo, dateFrom, dateFrom],
-          y: [0, 0, 1e9, 1e9, 0],
-          fill: 'toself',
-          fillcolor: 'rgba(26,86,219,0.05)',
-          line: { width: 0 },
+          x: [dateFrom, dateTo],
+          y: [null, null],           // no actual data — won't distort y-axis
+          type: 'scatter',
+          mode: 'none',
+          fill: 'tozeroy',
+          fillcolor: 'rgba(26,86,219,0.06)',
           showlegend: false,
           hoverinfo: 'skip',
-          type: 'scatter',
         })
       }
 
@@ -68,7 +66,7 @@ export default function ForecastChart({
         const c  = PROD_COLORS[idx % PROD_COLORS.length]
         const cl = PROD_COLORS_LIGHT[idx % PROD_COLORS_LIGHT.length]
 
-        // Historical
+        // Historical solid line
         const hist = sales
           .filter(r => r.product_name === p && r.date >= histStr && r.date < todayStr)
           .sort((a, b) => a.date.localeCompare(b.date))
@@ -77,12 +75,12 @@ export default function ForecastChart({
           traces.push({
             x: hist.map(r => r.date),
             y: hist.map(r => r.sales_qty),
+            type: 'scatter',
             mode: 'lines',
             name: `${p} — aktual`,
             line: { color: c, width: 1.8 },
             opacity: 0.85,
             legendgroup: p,
-            type: 'scatter',
           })
         }
 
@@ -94,55 +92,92 @@ export default function ForecastChart({
         if (fc.length) {
           const fcDates = fc.map(r => r.forecast_date)
           const bandX   = [...fcDates, ...[...fcDates].reverse()]
-          const bandY   = [...fc.map(r => r.forecast_upper), ...[...fc].reverse().map(r => r.forecast_lower)]
+          const bandY   = [
+            ...fc.map(r => r.forecast_upper),
+            ...[...fc].reverse().map(r => r.forecast_lower),
+          ]
 
           traces.push({
-            x: bandX, y: bandY,
+            x: bandX,
+            y: bandY,
+            type: 'scatter',
             fill: 'toself',
             fillcolor: cl + '55',
             line: { color: 'rgba(0,0,0,0)' },
             showlegend: false,
             hoverinfo: 'skip',
             legendgroup: p,
-            type: 'scatter',
           })
 
           traces.push({
             x: fcDates,
             y: fc.map(r => r.forecast_qty),
+            type: 'scatter',
             mode: 'lines',
             name: `${p} — forecast`,
             line: { color: c, width: 2, dash: 'dot' },
             legendgroup: p,
-            type: 'scatter',
           })
         }
       })
 
-      // "Today" vertical line
-      traces.push({
-        x: [todayStr, todayStr],
-        y: [0, 1e9],
-        mode: 'lines',
-        line: { color: 'rgba(0,0,0,0.15)', dash: 'dot', width: 1 },
-        showlegend: false,
-        hoverinfo: 'skip',
-        type: 'scatter',
-      })
-
+      // ── "Today" vertical line via shape (not a trace) ──────────────
+      // Using shapes avoids adding a data point that could distort y-axis
       const layout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor:  'rgba(0,0,0,0)',
         height,
-        margin: { l: 40, r: 8, t: 8, b: 40 },
+        margin: { l: 48, r: 8, t: 8, b: 40 },
         hovermode: 'x unified',
-        legend: { bgcolor: 'rgba(0,0,0,0)', borderwidth: 0, font: { size: 10 } },
-        xaxis: { gridcolor: 'rgba(0,0,0,0.05)', tickformat: '%d %b', type: 'date', showline: false },
-        yaxis: { gridcolor: 'rgba(0,0,0,0.05)', showline: false, rangemode: 'tozero' },
+        legend: {
+          bgcolor: 'rgba(0,0,0,0)',
+          borderwidth: 0,
+          font: { size: 10 },
+        },
+        xaxis: {
+          gridcolor: 'rgba(0,0,0,0.05)',
+          tickformat: '%d %b',
+          type: 'date',
+          showline: false,
+        },
+        yaxis: {
+          gridcolor: 'rgba(0,0,0,0.05)',
+          showline: false,
+          rangemode: 'tozero',
+          // do NOT set a fixed range — let Plotly autoscale from real data
+        },
         font: { family: 'IBM Plex Sans', size: 11, color: '#6b7280' },
+        shapes: [
+          // "Today" vertical dashed line — uses axis-relative coords, no y-data
+          {
+            type: 'line',
+            x0: todayStr,
+            x1: todayStr,
+            y0: 0,
+            y1: 1,
+            yref: 'paper',   // 0=bottom, 1=top of plot area — not data units
+            line: { color: 'rgba(0,0,0,0.18)', dash: 'dot', width: 1 },
+          },
+        ],
+        annotations: [
+          {
+            x: todayStr,
+            y: 1,
+            yref: 'paper',
+            xanchor: 'left',
+            yanchor: 'top',
+            text: 'Hari ini',
+            showarrow: false,
+            font: { size: 9, color: '#9ca3af' },
+            xshift: 4,
+          },
+        ],
       }
 
-      Plotly.react(divRef.current!, traces, layout, { responsive: true, displayModeBar: false })
+      Plotly.react(divRef.current!, traces, layout, {
+        responsive: true,
+        displayModeBar: false,
+      })
     })
 
     return () => { cancelled = true }
