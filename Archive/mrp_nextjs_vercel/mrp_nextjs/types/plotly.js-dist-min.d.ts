@@ -1,8 +1,22 @@
-/// <reference types="plotly.js" />
-
-// plotly.js-dist-min is a pre-bundled UMD build with the same API surface.
-// We re-export all types from @types/plotly.js so TypeScript is satisfied.
+// Minimal type declaration for plotly.js-dist-min
+// Using a self-contained definition avoids dependency on @types/plotly.js
 declare module 'plotly.js-dist-min' {
-  import * as Plotly from 'plotly.js'
-  export = Plotly
+  interface Layout {
+    [key: string]: unknown
+  }
+  interface Config {
+    [key: string]: unknown
+  }
+  function react(
+    root: HTMLElement | string,
+    data: object[],
+    layout?: Partial<Layout>,
+    config?: Partial<Config>,
+  ): Promise<void>
+  function newPlot(
+    root: HTMLElement | string,
+    data: object[],
+    layout?: Partial<Layout>,
+    config?: Partial<Config>,
+  ): Promise<void>
 }

@@ -19,7 +19,6 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@types/papaparse": "^5.3.15",
-    "@types/plotly.js": "^2.12.29",
     "typescript": "^5.8.3",
     "tailwindcss": "^3.4.17",
     "postcss": "^8.5.3",
